@@ -22,6 +22,7 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import com.mygdx.game.helpers.AssetManager;
 
 /** Super Mario Brothers-like very basic platformer, using a tile map built using <a href="http://www.mapeditor.org/">Tiled</a> and a
  * tileset and sprites by <a href="http://www.vickiwenderlich.com/">Vicky Wenderlich</a></p>
@@ -73,6 +74,8 @@ public class Superkoalio extends ApplicationAdapter {
 
 	@Override
 	public void create () {
+		AssetManager.load();
+		AssetManager.music.play();
 		// load the koala frames, split them, and assign them to Animations
 		koalaTexture = new Texture("koalio.png");
 		TextureRegion[] regions = TextureRegion.split(koalaTexture, 18, 26)[0];
@@ -101,6 +104,7 @@ public class Superkoalio extends ApplicationAdapter {
 		koala.position.set(20, 20);
 
 		debugRenderer = new ShapeRenderer();
+
 	}
 
 	@Override
@@ -123,6 +127,7 @@ public class Superkoalio extends ApplicationAdapter {
 		// camera sees, and render the map
 		renderer.setView(camera);
 		renderer.render();
+
 
 		// render the koala
 		renderKoala(deltaTime);
