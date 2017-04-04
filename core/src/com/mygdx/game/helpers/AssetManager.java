@@ -16,6 +16,8 @@ public class AssetManager {
     public static Music music;
     public static BitmapFont font;
     public static TextureRegion background;
+    public static Texture koalaTexture;
+
     public static void load(){
         sheet = new Texture(Gdx.files.internal("MTiZGmj.png"));
         sheet.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
@@ -30,6 +32,11 @@ public class AssetManager {
 
         background = new TextureRegion(sheet, 0, 0, 1000, 1000);
         background.flip(false, false);
+
+        koalaTexture = new Texture("koalio.png");
+
+
+
     }
 
     public static void dispose(){

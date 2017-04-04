@@ -3,6 +3,7 @@ package com.mygdx.game.screens;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -38,7 +39,7 @@ import javax.security.auth.callback.TextOutputCallback;
  *
  * Shows simple platformer collision detection as well as on-the-fly map modifications through destructible blocks!
  * @author mzechner */
-public class Superkoalio extends ApplicationAdapter {
+public class Superkoalio extends ApplicationAdapter implements Screen {
 	/** The player character, has state and state time, */
 
 	boolean inici, fina;
@@ -95,7 +96,7 @@ public class Superkoalio extends ApplicationAdapter {
 		AssetManager.load();
 		AssetManager.music.play();
 		// load the koala frames, split them, and assign them to Animations
-		koalaTexture = new Texture("koalio.png");
+		koalaTexture = AssetManager.koalaTexture;
 		TextureRegion[] regions = TextureRegion.split(koalaTexture, 18, 26)[0];
 		stand = new Animation(0, regions[0]);
 		jump = new Animation(0, regions[1]);
@@ -410,6 +411,21 @@ public class Superkoalio extends ApplicationAdapter {
 			}
 		}
 		debugRenderer.end();
+	}
+
+	@Override
+	public void show() {
+
+	}
+
+	@Override
+	public void render(float delta) {
+
+	}
+
+	@Override
+	public void hide() {
+
 	}
 
 	@Override
