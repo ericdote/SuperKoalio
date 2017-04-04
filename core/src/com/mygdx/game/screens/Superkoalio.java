@@ -1,4 +1,4 @@
-package com.mygdx.game;
+package com.mygdx.game.screens;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
@@ -20,9 +20,18 @@ import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import com.mygdx.game.helpers.AssetManager;
+import com.mygdx.game.screens.SplashScreen;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.security.auth.callback.TextOutputCallback;
+
 
 /** Super Mario Brothers-like very basic platformer, using a tile map built using <a href="http://www.mapeditor.org/">Tiled</a> and a
  * tileset and sprites by <a href="http://www.vickiwenderlich.com/">Vicky Wenderlich</a></p>
@@ -32,6 +41,9 @@ import com.mygdx.game.helpers.AssetManager;
 public class Superkoalio extends ApplicationAdapter {
 	/** The player character, has state and state time, */
 
+	boolean inici, fina;
+	List<Float> altura = new ArrayList<Float>();
+
 	static class Koala {
 		static float WIDTH;
 		static float HEIGHT;
@@ -40,7 +52,7 @@ public class Superkoalio extends ApplicationAdapter {
 		static float DAMPING = 0.87f;
 
 		enum State {
-			Standing, Walking, Jumping
+			Standing, Walking, Jumping, Win
 		}
 
 		final Vector2 position = new Vector2();
@@ -49,6 +61,7 @@ public class Superkoalio extends ApplicationAdapter {
 		float stateTime = 0;
 		boolean facesRight = true;
 		boolean grounded = false;
+		int vidas = 5;
 	}
 
 	private TiledMap map;
@@ -58,7 +71,11 @@ public class Superkoalio extends ApplicationAdapter {
 	private Animation<TextureRegion> stand;
 	private Animation<TextureRegion> walk;
 	private Animation<TextureRegion> jump;
+	private Animation<TextureRegion> win;
 	private Koala koala;
+	float altu = 0;
+	private int contador = 0;
+	private boolean checkpoint;
 	private Pool<Rectangle> rectPool = new Pool<Rectangle>() {
 		@Override
 		protected Rectangle newObject () {
@@ -74,6 +91,7 @@ public class Superkoalio extends ApplicationAdapter {
 
 	@Override
 	public void create () {
+
 		AssetManager.load();
 		AssetManager.music.play();
 		// load the koala frames, split them, and assign them to Animations
@@ -83,6 +101,8 @@ public class Superkoalio extends ApplicationAdapter {
 		jump = new Animation(0, regions[1]);
 		walk = new Animation(0.15f, regions[2], regions[3], regions[4]);
 		walk.setPlayMode(Animation.PlayMode.LOOP_PINGPONG);
+		win = new Animation(0.25f, regions[5], regions[6]);
+		win.setPlayMode(Animation.PlayMode.LOOP_PINGPONG);
 
 		// figure out the width and height of the koala for collision
 		// detection and rendering by converting a koala frames pixel
@@ -97,21 +117,22 @@ public class Superkoalio extends ApplicationAdapter {
 		// create an orthographic camera, shows us 30x20 units of the world
 		camera = new OrthographicCamera();
 		camera.setToOrtho(false, 30, 20);
+		camera.position.x = 15;
 		camera.update();
 
 		// create the Koala we want to move around the world
 		koala = new Koala();
-		koala.position.set(20, 20);
+		koala.position.set(6, 21);
 
 		debugRenderer = new ShapeRenderer();
+
 
 	}
 
 	@Override
 	public void render () {
 		// clear the screen
-		Gdx.gl.glClearColor(0.7f, 0.7f, 1.0f, 1);
-		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
 
 		// get the delta time
 		float deltaTime = Gdx.graphics.getDeltaTime();
@@ -120,7 +141,34 @@ public class Superkoalio extends ApplicationAdapter {
 		updateKoala(deltaTime);
 
 		// let the camera follow the koala, x-axis only
-		camera.position.x = koala.position.x;
+
+		if(koala.position.x >= 15) {
+			camera.position.x = koala.position.x;
+			if(koala.position.x >= 197){
+				camera.position.x = 197;
+			}
+		}
+		if(koala.position.y <= 17 && koala.position.y >= 16){
+			camera.position.y = koala.position.y;
+		} if(koala.position.y < 16){
+			camera.position.y = 10;
+		}
+		if(koala.position.x > 6 && koala.position.x < 6.5 && koala.position.y > 20.5){
+			koala.state = Koala.State.Win;
+			contador++;
+			if(contador == 70){
+				koala.facesRight = !koala.facesRight;
+				contador = 0;
+				altu++;
+				if(altu == 20){
+					//TODO que aparezca mensaje
+				}
+			}
+
+		} else if(koala.position.x > 167 && koala.position.y == 17){
+			checkpoint = true;
+		}
+		Gdx.app.log("", koala.position.x+"X"+koala.position.y);
 		camera.update();
 
 		// set the TiledMapRenderer view based on what the
@@ -134,6 +182,27 @@ public class Superkoalio extends ApplicationAdapter {
 
 		// render debug rectangles
 		if (debug) renderDebug();
+		/*for (float altur: altura) {
+			altu += altur;
+			//Gdx.app.log("Altura", altu+"");
+		}
+		if(altu/30 >= 10){
+			Gdx.app.log("Muerto", "Caida de la hostia");
+		}
+
+		if(altura.size() >= 30){
+			altura.add(contador, koala.position.y);
+			contador++;
+		} else {
+			altura.add(koala.position.y);
+		}
+		if(contador == 30){
+			contador = 0;
+			altu = 0;
+		}
+		Gdx.app.log("", altura.get(contador)+"");
+*/
+
 	}
 
 	private void updateKoala (float deltaTime) {
@@ -226,7 +295,7 @@ public class Superkoalio extends ApplicationAdapter {
 					koala.position.y = tile.y - Koala.HEIGHT;
 					// we hit a block jumping upwards, let's destroy it!
 					TiledMapTileLayer layer = (TiledMapTileLayer)map.getLayers().get("walls");
-					layer.setCell((int)tile.x, (int)tile.y, null);
+					//layer.setCell((int)tile.x, (int)tile.y, null);
 				} else {
 					koala.position.y = tile.y + tile.height;
 					// if we hit the ground, mark us as grounded so we can jump
@@ -250,7 +319,16 @@ public class Superkoalio extends ApplicationAdapter {
 		if (koala.position.y <= 0)
 		{
 			Gdx.app.log ("muerte", "Koala Dead");
+			koala.position.set(0, 10);
+			camera.position.x = 15;
+		} else if (checkpoint && koala.position.y < 14){
+			Gdx.app.log ("muerte", "Checkpoint");
+			koala.position.y = 17;
+			koala.position.x = 168;
+			camera.position.x = koala.position.x;
+			camera.position.y = koala.position.y;
 		}
+
 
 	}
 
@@ -295,6 +373,8 @@ public class Superkoalio extends ApplicationAdapter {
 			case Jumping:
 				frame = jump.getKeyFrame(koala.stateTime);
 				break;
+			case Win:
+				frame = win.getKeyFrame(koala.stateTime);
 		}
 
 		// draw the koala, depending on the current velocity
@@ -304,6 +384,7 @@ public class Superkoalio extends ApplicationAdapter {
 		batch.begin();
 		if (koala.facesRight) {
 			batch.draw(frame, koala.position.x, koala.position.y, Koala.WIDTH, Koala.HEIGHT);
+
 		} else {
 			batch.draw(frame, koala.position.x + Koala.WIDTH, koala.position.y, -Koala.WIDTH, Koala.HEIGHT);
 		}

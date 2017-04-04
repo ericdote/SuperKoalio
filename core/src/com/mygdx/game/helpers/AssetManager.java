@@ -2,18 +2,38 @@ package com.mygdx.game.helpers;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 /**
  * Created by Eric on 24/03/2017.
  */
 
 public class AssetManager {
-
+    public static Texture sheet;
     public static Music music;
-
+    public static BitmapFont font;
+    public static TextureRegion background;
     public static void load(){
+        sheet = new Texture(Gdx.files.internal("MTiZGmj.png"));
+        sheet.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+
         music = Gdx.audio.newMusic(Gdx.files.internal("04-banana-jungle.mp3"));
         music.setVolume(0.2f);
         music.setLooping(true);
+
+        FileHandle fontFile = Gdx.files.internal("fonts/space.fnt");
+        font = new BitmapFont(fontFile, false);
+        font.getData().setScale(1.4f);
+
+        background = new TextureRegion(sheet, 0, 0, 1000, 1000);
+        background.flip(false, false);
+    }
+
+    public static void dispose(){
+        sheet.dispose();
+        music.dispose();
     }
 }
