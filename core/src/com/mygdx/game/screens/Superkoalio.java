@@ -45,7 +45,6 @@ public class Superkoalio implements Screen {
 	private GlyphLayout vidas;
 	Batch batch;
 	private int vida = 4;
-	private Koalio game;
 
 	static class Koala {
 		static float WIDTH;
@@ -89,13 +88,15 @@ public class Superkoalio implements Screen {
 		}
 	};
 	private Array<Rectangle> tiles = new Array<Rectangle>();
+	private Koalio game;
 
 	private static final float GRAVITY = -2.5f;
 
 	private boolean debug = false;
 	private ShapeRenderer debugRenderer;
 
-	public Superkoalio() {
+	public Superkoalio(Koalio game) {
+		this.game = game;
 		AssetManager.load();
 		AssetManager.music.play();
 		// load the koala frames, split them, and assign them to Animations
@@ -166,6 +167,7 @@ public class Superkoalio implements Screen {
 
 		if (Gdx.input.isKeyJustPressed(Keys.B))
 			debug = !debug;
+
 
 		// apply gravity if we are falling
 		koala.velocity.add(0, GRAVITY);
@@ -310,8 +312,6 @@ public class Superkoalio implements Screen {
 			case Win:
 				frame = win.getKeyFrame(koala.stateTime);
 				break;
-			case Death:
-				//TODO Hacer algo cuando muera
 		}
 
 		// draw the koala, depending on the current velocity
@@ -361,8 +361,7 @@ public class Superkoalio implements Screen {
 		// get the delta time
 		float deltaTime = Gdx.graphics.getDeltaTime();
 
-		// update the koala (process input, collision detection, position update)
-		updateKoala(deltaTime);
+
 
 		// let the camera follow the koala, x-axis only
 		batch = renderer.getBatch();
@@ -407,8 +406,7 @@ public class Superkoalio implements Screen {
 		renderer.render();
 
 
-		// render the koala
-		renderKoala(deltaTime);
+
 
 		// render debug rectangles
 		if (debug) renderDebug();
@@ -449,10 +447,17 @@ public class Superkoalio implements Screen {
 			btch.draw(life, 560, 430);
 		} else if (vida == 1){
 			btch.draw(life, 580, 430);
-		} else if (vida == 0){
-			koala.state = Koala.State.Death;
+		} else if (vida <= 0){
+			game.setScreen(new SplashScreen(game));
+
 		}
+		Gdx.app.log("Vidas", vida+"");
 		btch.end();
+
+		// render the koala
+		renderKoala(deltaTime);
+		// update the koala (process input, collision detection, position update)
+		updateKoala(deltaTime);
 	}
 
 	@Override

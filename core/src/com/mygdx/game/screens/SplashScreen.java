@@ -1,4 +1,5 @@
 package com.mygdx.game.screens;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.g2d.Animation;
@@ -25,13 +26,13 @@ public class SplashScreen implements Screen {
 
     private Stage stage;
     private Label.LabelStyle textStyle;
-    private Koalio game;
+    private final Koalio game;
     private Label txtLbl;
     private TextButton jugar;
     private TextButton salir;
     private TextButton.TextButtonStyle textButtonStyle;
 
-    public SplashScreen(Koalio game){
+    public SplashScreen(final Koalio game) {
         this.game = game;
 
         Gdx.app.log("HOLA", "w");
@@ -63,7 +64,7 @@ public class SplashScreen implements Screen {
         Container contSalir = new Container(salir);
         contSalir.setTransform(true);
         contSalir.center();
-        contSalir.setPosition(350,150);
+        contSalir.setPosition(350, 150);
         stage.addActor(container);
         stage.addActor(contJugar);
         stage.addActor(contSalir);
@@ -71,10 +72,16 @@ public class SplashScreen implements Screen {
         jugar.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                SplashScreen.this.game.setScreen(new Superkoalio());
+                SplashScreen.this.game.setScreen(new Superkoalio(game));
             }
         });
-        Gdx.input.setInputProcessor(stage);//TODO mirar esto
+        salir.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                Gdx.app.exit();
+            }
+        });
+        Gdx.input.setInputProcessor(stage);
 
     }
 
@@ -84,10 +91,10 @@ public class SplashScreen implements Screen {
     }
 
     @Override
-    public void render(float delta){
+    public void render(float delta) {
         stage.draw();
         stage.act(delta);
-        if(Gdx.input.isTouched()){
+        if (Gdx.input.isTouched()) {
 
         }
     }
