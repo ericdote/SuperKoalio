@@ -2,7 +2,10 @@ package com.mygdx.game.screens;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.actions.RepeatAction;
@@ -31,14 +34,16 @@ public class SplashScreen implements Screen {
     private TextButton jugar;
     private TextButton salir;
     private TextButton.TextButtonStyle textButtonStyle;
+    private OrthographicCamera camera;
 
     public SplashScreen(final Koalio game) {
         this.game = game;
 
         Gdx.app.log("HOLA", "w");
 
-        OrthographicCamera camera = new OrthographicCamera();
-        camera.setToOrtho(true);
+        camera = new OrthographicCamera();
+        camera.setToOrtho(false, 30, 20);
+        camera.update();
 
         stage = new Stage();
 
@@ -46,10 +51,11 @@ public class SplashScreen implements Screen {
         stage.addActor(new Image(AssetManager.background));
         textButtonStyle = new TextButton.TextButtonStyle();
         textButtonStyle.font = AssetManager.font;
-
+        //Afegim el text de titul
         textStyle = new Label.LabelStyle(AssetManager.font, null);
         txtLbl = new Label("SuperKoalio", textStyle);
         stage.addActor(txtLbl);
+        //Afegim els dos botons per interactuar entre jugar i sortir.
         Container container = new Container(txtLbl);
         container.setTransform(true);
         container.center();
@@ -68,7 +74,7 @@ public class SplashScreen implements Screen {
         stage.addActor(container);
         stage.addActor(contJugar);
         stage.addActor(contSalir);
-
+        //Donem funcio als botons.
         jugar.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
@@ -82,6 +88,7 @@ public class SplashScreen implements Screen {
             }
         });
         Gdx.input.setInputProcessor(stage);
+
 
     }
 

@@ -23,26 +23,27 @@ public class AssetManager {
     public static Texture vidas;
 
     public static void load(){
+        //Fons
         sheet = new Texture(Gdx.files.internal("MTiZGmj.png"));
         sheet.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
-
+        //Musica
         music = Gdx.audio.newMusic(Gdx.files.internal("04-banana-jungle.mp3"));
         music.setVolume(0.2f);
         music.setLooping(true);
-
+        //Font
         FileHandle fontFile = Gdx.files.internal("fonts/space.fnt");
         font = new BitmapFont(fontFile, false);
         font.getData().setScale(1.4f);
         fontVidas = new BitmapFont(fontFile, false);
         fontVidas.getData().setScale(0.1f);
-
+        //Fons
         background = new TextureRegion(sheet, 0, 0, 1000, 1000);
         background.flip(false, false);
-
+        //Texturas
         koalaTexture = new Texture("koalio.png");
         vidas = new Texture("life.png");
 
-
+        //Sonido del checkpoint
         checkPoint = Gdx.audio.newSound(Gdx.files.internal("checkpoint.mp3"));
         checkPoint.setVolume(1, 0.4f);
         checkPoint.setLooping(1 ,false);

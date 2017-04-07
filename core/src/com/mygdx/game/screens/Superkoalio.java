@@ -40,11 +40,8 @@ import java.util.List;
 public class Superkoalio implements Screen {
 	/** The player character, has state and state time, */
 
-	boolean inici, fina;
-	List<Float> altura = new ArrayList<Float>();
-	private GlyphLayout vidas;
 	Batch batch;
-	private int vida = 4;
+	private int vida = 4; //Contador de vidas del koala
 
 	static class Koala {
 		static float WIDTH;
@@ -54,7 +51,7 @@ public class Superkoalio implements Screen {
 		static float DAMPING = 0.87f;
 
 		enum State {
-			Standing, Walking, Jumping, Win, Death
+			Standing, Walking, Jumping, Win
 		}
 
 		final Vector2 position = new Vector2();
@@ -63,24 +60,23 @@ public class Superkoalio implements Screen {
 		float stateTime = 0;
 		boolean facesRight = true;
 		boolean grounded = false;
-		int vidas = 5;
 	}
 
 
 	private TiledMap map;
 	private OrthogonalTiledMapRenderer renderer;
-	private OrthographicCamera camera, hud;
+	private OrthographicCamera camera;
 
 	private Texture koalaTexture;
 	private Texture life;
 	private Animation<TextureRegion> stand;
 	private Animation<TextureRegion> walk;
 	private Animation<TextureRegion> jump;
-	private Animation<TextureRegion> win;
+	private Animation<TextureRegion> win; //Animacion para cuando gana el Koala
 	private Koala koala;
-	float altu = 0;
+	float altu = 0;//Contador para que el koala "baile"
 	private int contador = 0;
-	private boolean checkpoint;
+	private boolean checkpoint;//Booleano para cuando pasamos el checkpoint
 	private Pool<Rectangle> rectPool = new Pool<Rectangle>() {
 		@Override
 		protected Rectangle newObject () {
@@ -88,7 +84,8 @@ public class Superkoalio implements Screen {
 		}
 	};
 	private Array<Rectangle> tiles = new Array<Rectangle>();
-	private Koalio game;
+	private Koalio game;//Game que le llega al constructor
+	private boolean finalWin;//Booleano para deshabilitar las teclas al ganar
 
 	private static final float GRAVITY = -2.5f;
 
@@ -97,17 +94,18 @@ public class Superkoalio implements Screen {
 
 	public Superkoalio(Koalio game) {
 		this.game = game;
+		finalWin = true;
 		AssetManager.load();
 		AssetManager.music.play();
 		// load the koala frames, split them, and assign them to Animations
 		koalaTexture = AssetManager.koalaTexture;
-		life = AssetManager.vidas;
+		life = AssetManager.vidas;//Texturas de las vidas
 		TextureRegion[] regions = TextureRegion.split(koalaTexture, 18, 26)[0];
 		stand = new Animation(0, regions[0]);
 		jump = new Animation(0, regions[1]);
 		walk = new Animation(0.15f, regions[2], regions[3], regions[4]);
 		walk.setPlayMode(Animation.PlayMode.LOOP_PINGPONG);
-		win = new Animation(0.25f, regions[5], regions[6]);
+		win = new Animation(0.25f, regions[5], regions[6]);//Animacion para cuando ganamos
 		win.setPlayMode(Animation.PlayMode.LOOP_PINGPONG);
 
 		// figure out the width and height of the koala for collision
@@ -147,25 +145,25 @@ public class Superkoalio implements Screen {
 		koala.stateTime += deltaTime;
 
 		// check input and apply to velocity & state
-		if ((Gdx.input.isKeyPressed(Keys.SPACE) || isTouched(0.5f, 1)) && koala.grounded) {
+		if ((Gdx.input.isKeyPressed(Keys.SPACE) || isTouched(0.5f, 1)) && koala.grounded && finalWin) {
 			koala.velocity.y += Koala.JUMP_VELOCITY;
 			koala.state = Koala.State.Jumping;
 			koala.grounded = false;
 		}
 
-		if (Gdx.input.isKeyPressed(Keys.LEFT) || Gdx.input.isKeyPressed(Keys.A) || isTouched(0, 0.25f)) {
+		if ((Gdx.input.isKeyPressed(Keys.LEFT) || Gdx.input.isKeyPressed(Keys.A) || isTouched(0, 0.25f)) && finalWin) {
 			koala.velocity.x = -Koala.MAX_VELOCITY;
 			if (koala.grounded) koala.state = Koala.State.Walking;
 			koala.facesRight = false;
 		}
 
-		if (Gdx.input.isKeyPressed(Keys.RIGHT) || Gdx.input.isKeyPressed(Keys.D) || isTouched(0.25f, 0.5f)) {
+		if ((Gdx.input.isKeyPressed(Keys.RIGHT) || Gdx.input.isKeyPressed(Keys.D) || isTouched(0.25f, 0.5f))&& finalWin) {
 			koala.velocity.x = Koala.MAX_VELOCITY;
 			if (koala.grounded) koala.state = Koala.State.Walking;
 			koala.facesRight = true;
 		}
 
-		if (Gdx.input.isKeyJustPressed(Keys.B))
+		if (Gdx.input.isKeyJustPressed(Keys.B) && finalWin)
 			debug = !debug;
 
 
@@ -249,13 +247,13 @@ public class Superkoalio implements Screen {
 		// Apply damping to the velocity on the x-axis so we don't
 		// walk infinitely once a key was pressed
 		koala.velocity.x *= Koala.DAMPING;
-
+		//Si la vida del Koala es inferior a 0 le ponemos que reaparezca al principio, le restamos una vida y posicionamos la camara.
 		if (koala.position.y <= 0)
 		{
 			koala.position.set(0, 10);
 			camera.position.x = 15;
 			vida--;
-
+		//Si el Koala ya ha pasado el checkpoint y cae, le restamos una vida y le posicionamos en el checkpoint asi como la camara.
 		} else if (checkpoint && koala.position.y < 14){
 			koala.position.y = 17;
 			koala.position.x = 168;
@@ -304,7 +302,6 @@ public class Superkoalio implements Screen {
 				break;
 			case Walking:
 				frame = walk.getKeyFrame(koala.stateTime);
-
 				break;
 			case Jumping:
 				frame = jump.getKeyFrame(koala.stateTime);
@@ -365,33 +362,37 @@ public class Superkoalio implements Screen {
 
 		// let the camera follow the koala, x-axis only
 		batch = renderer.getBatch();
-
+		//Si el koala sobrepasa el pixel 15, la camara le siguie
 		if(koala.position.x >= 15) {
 			camera.position.x = koala.position.x;
+			//Si pasa del 197 la camara se queda estatica. Con esto simulamos inicio y fin de mapa.
 			if(koala.position.x >= 197){
 				camera.position.x = 197;
-
-
-
 			}
 		}
+		//Si el koala esta entre la posicion 16 y 17 la camara le sigue
 		if(koala.position.y <= 17 && koala.position.y >= 16){
 			camera.position.y = koala.position.y;
+			//Si la camara esta por debajo de 16 la camara se posiciona en la "mitad" del mapa
 		} if(koala.position.y < 16){
 			camera.position.y = 10;
 		}
+		//Si el koala llega a esta posiciones se le assigna que ha ganado, se pone el boleano a falso y asi se deshabilita los controles, se suma un contador
+		//Para que cada 70 veces que se haga el render se el koala gire.
 		if(koala.position.x > 6 && koala.position.x < 6.5 && koala.position.y > 20.5){
 			koala.state = Koala.State.Win;
+			finalWin = false;
 			contador++;
 			if(contador == 70){
 				koala.facesRight = !koala.facesRight;
 				contador = 0;
 				altu++;
-				if(altu == 20){
-					this.dispose();
+				//Cuando el koala haya girado 8 veces, vuelve al menu inicial.
+				if(altu == 8){
+					game.setScreen(new SplashScreen(game));
 				}
 			}
-
+		//Si llegamos al checkpoint se guarda como pasado y suena un sonido.
 		} else if(!checkpoint && koala.position.x < 168 && koala.position.x > 167 && koala.position.y == 17){
 			checkpoint = true;
 			AssetManager.checkPoint.play();
@@ -410,43 +411,26 @@ public class Superkoalio implements Screen {
 
 		// render debug rectangles
 		if (debug) renderDebug();
-		/*for (float altur: altura) {
-			altu += altur;
-			//Gdx.app.log("Altura", altu+"");
-		}
-		if(altu/30 >= 10){
-			Gdx.app.log("Muerto", "Caida de la hostia");
-		}
-
-		if(altura.size() >= 30){
-			altura.add(contador, koala.position.y);
-			contador++;
-		} else {
-			altura.add(koala.position.y);
-		}
-		if(contador == 30){
-			contador = 0;
-			altu = 0;
-		}
-		Gdx.app.log("", altura.get(contador)+"");
-*/
-
+		//Spritebatch usado para dibujar las vidas
 		SpriteBatch btch = new SpriteBatch();
 		btch.begin();
+		//Si tenemos 4 vidas, dibuja 4, y asi con todas..
 		if(vida == 4){
-			btch.draw(life, 580, 430);
-			btch.draw(life, 560, 430);
-			btch.draw(life, 540, 430);
-			btch.draw(life, 520, 430);
+			btch.draw(life, 0, 8);
+			btch.draw(life, 20, 8);
+			btch.draw(life, 40, 8);
+			btch.draw(life, 60, 8);
+
 		} else if(vida == 3){
-			btch.draw(life, 580, 430);
-			btch.draw(life, 560, 430);
-			btch.draw(life, 540, 430);
+			btch.draw(life, 0, 8);
+			btch.draw(life, 20, 8);
+			btch.draw(life, 40, 8);
 		} else if (vida == 2){
-			btch.draw(life, 580, 430);
-			btch.draw(life, 560, 430);
+			btch.draw(life, 0, 8);
+			btch.draw(life, 20, 8);
 		} else if (vida == 1){
-			btch.draw(life, 580, 430);
+			btch.draw(life, 0, 8);
+			//Si no quedan vidas salta al menu de inicio
 		} else if (vida <= 0){
 			game.setScreen(new SplashScreen(game));
 
