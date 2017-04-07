@@ -86,6 +86,8 @@ public class Superkoalio implements Screen {
 	private Array<Rectangle> tiles = new Array<Rectangle>();
 	private Koalio game;//Game que le llega al constructor
 	private boolean finalWin;//Booleano para deshabilitar las teclas al ganar
+	private boolean extraLife;//Si tocas la seta te suma un corazon
+	private boolean extraLife2;//Si tocas la segunda seta te suma otro corazon
 
 	private static final float GRAVITY = -2.5f;
 
@@ -253,6 +255,7 @@ public class Superkoalio implements Screen {
 			koala.position.set(0, 10);
 			camera.position.x = 15;
 			vida--;
+			AssetManager.lifeLess.play();
 		//Si el Koala ya ha pasado el checkpoint y cae, le restamos una vida y le posicionamos en el checkpoint asi como la camara.
 		} else if (checkpoint && koala.position.y < 14){
 			koala.position.y = 17;
@@ -260,6 +263,15 @@ public class Superkoalio implements Screen {
 			camera.position.x = koala.position.x;
 			camera.position.y = koala.position.y;
 			vida--;
+			AssetManager.lifeLess.play();
+		} else if((koala.position.y == 10 && koala.position.x > 54 && koala.position.x< 55) && !extraLife) {
+			vida++;
+			extraLife = true;
+			AssetManager.lifeUp.play();
+		} else if((koala.position.y == 25 && koala.position.x > 207 && koala.position.x < 208) && !extraLife2){
+			vida++;
+			extraLife2 = true;
+			AssetManager.lifeUp.play();
 		}
 
 
@@ -381,6 +393,10 @@ public class Superkoalio implements Screen {
 		//Para que cada 70 veces que se haga el render se el koala gire.
 		if(koala.position.x > 6 && koala.position.x < 6.5 && koala.position.y > 20.5){
 			koala.state = Koala.State.Win;
+			if(finalWin){
+				AssetManager.music.dispose();
+				AssetManager.win.play();
+			}
 			finalWin = false;
 			contador++;
 			if(contador == 70){
@@ -414,13 +430,12 @@ public class Superkoalio implements Screen {
 		//Spritebatch usado para dibujar las vidas
 		SpriteBatch btch = new SpriteBatch();
 		btch.begin();
-		//Si tenemos 4 vidas, dibuja 4, y asi con todas..
+		//Si tenemos 6 vidas, dibuja 6, y asi con todas..
 		if(vida == 4){
 			btch.draw(life, 0, 8);
 			btch.draw(life, 20, 8);
 			btch.draw(life, 40, 8);
 			btch.draw(life, 60, 8);
-
 		} else if(vida == 3){
 			btch.draw(life, 0, 8);
 			btch.draw(life, 20, 8);
@@ -432,7 +447,24 @@ public class Superkoalio implements Screen {
 			btch.draw(life, 0, 8);
 			//Si no quedan vidas salta al menu de inicio
 		} else if (vida <= 0){
+			AssetManager.music.dispose();
+			AssetManager.gameOver.play();
 			game.setScreen(new SplashScreen(game));
+
+		} else if(vida == 5){
+			btch.draw(life, 0, 8);
+			btch.draw(life, 20, 8);
+			btch.draw(life, 40, 8);
+			btch.draw(life, 60, 8);
+			btch.draw(life, 80, 8);
+		}
+		else if(vida == 6){
+			btch.draw(life, 0, 8);
+			btch.draw(life, 20, 8);
+			btch.draw(life, 40, 8);
+			btch.draw(life, 60, 8);
+			btch.draw(life, 80, 8);
+			btch.draw(life, 100, 8);
 
 		}
 		Gdx.app.log("Vidas", vida+"");

@@ -20,6 +20,10 @@ public class AssetManager {
     public static TextureRegion background;
     public static Texture koalaTexture;
     public static Sound checkPoint;
+    public static Sound lifeUp;
+    public static Sound lifeLess;
+    public static Sound win;
+    public static Sound gameOver;
     public static Texture vidas;
 
     public static void load(){
@@ -37,16 +41,28 @@ public class AssetManager {
         fontVidas = new BitmapFont(fontFile, false);
         fontVidas.getData().setScale(0.1f);
         //Fons
-        background = new TextureRegion(sheet, 0, 0, 1000, 1000);
+        background = new TextureRegion(sheet, 0, 0, 1920, 1080);
         background.flip(false, false);
         //Texturas
         koalaTexture = new Texture("koalio.png");
         vidas = new Texture("life.png");
 
-        //Sonido del checkpoint
+        //Sounds
         checkPoint = Gdx.audio.newSound(Gdx.files.internal("checkpoint.mp3"));
         checkPoint.setVolume(1, 0.4f);
         checkPoint.setLooping(1 ,false);
+        lifeLess = Gdx.audio.newSound(Gdx.files.internal("lifeleft.wav"));
+        lifeLess.setVolume(2, 0.4f);
+        lifeLess.setLooping(2 ,false);
+        lifeUp = Gdx.audio.newSound(Gdx.files.internal("lifeup.wav"));
+        lifeUp.setVolume(3, 0.4f);
+        lifeUp.setLooping(3 ,false);
+        win = Gdx.audio.newSound(Gdx.files.internal("win.wav"));
+        win.setVolume(1, 0.4f);
+        win.setLooping(1 ,false);
+        gameOver = Gdx.audio.newSound(Gdx.files.internal("gameover.wav"));
+        gameOver.setVolume(1, 0.4f);
+        gameOver.setLooping(1 ,false);
 
 
 
